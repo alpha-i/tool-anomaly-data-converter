@@ -1,0 +1,10 @@
+--extra-index-url https://repo.fury.io/zNzsk7gQsYY335HLzW9x/alpha-i/
+
+click==6.7
+h5py==2.7.1
+matplotlib==2.2.2
+numpy==1.14.2
+pandas==0.21.1
+scikit-learn==0.19.1
+scipy==1.0.1
+
