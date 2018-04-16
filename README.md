@@ -17,13 +17,9 @@ Each converter must create an hd5 file with the following structure:
 * `ABNORMAL`: contains measurement (samples) where the event is considered abnormal 
 * `TEST`: contains measurement where the type is unknown
 
-Each root-level group contains a list of subgroup labelled `SAMPLE_n`
-Each `SAMPLE_n` subgroup contains a dict with the following keys
-
-* `data`: the np.array containing the samples
-* `sample_rate`: number of samples per seconds
-* `sample_length_seconds`: the length of the sample in seconds (can be optional)
-
+Each root-level group contains two keys:
+ SAMPLE_RATE: is the unique sample rate valid for all the samples
+ DATA: list of subgroup labelled `SAMPLE_n` containing the np.array
 
 Convert Kaggle brainwaves data to hdf5
 --------------------

@@ -4,6 +4,7 @@ import os
 
 import h5py
 import click
+import numpy as np
 import scipy.io as spio
 
 warnings.simplefilter(action='ignore', category=FutureWarning)
@@ -25,28 +26,42 @@ KEY_TEMPLATE = '{}_segment_{}'
 def _read_and_parse_files(input_directory, subject_name, type_of_samples):
     filemask = FILEMASK.format(subject_name, type_of_samples)
     samples = []
+    sample_rates = []
+
     for full_file_path in glob.glob(os.path.join(input_directory, filemask)):
+
         click.echo("loading {} file {}".format(type_of_samples, full_file_path))
 
         datafile = spio.loadmat(full_file_path, squeeze_me=True)
         sample_number = os.path.splitext(os.path.basename(full_file_path))[0].split('_')[-1]
+
         key = KEY_TEMPLATE.format(type_of_samples, int(sample_number))
-        sample_data = {
-            'data': datafile[key].ravel()[0][0],
-            'sample_length_seconds': datafile[key].ravel()[0][1],
-            'sample_rate': datafile[key].ravel()[0][2]
-        }
+
+        sample_data = datafile[key].ravel()[0][0]
+        sample_rate = datafile[key].ravel()[0][2]
+        sample_rates.append(sample_rate)
+        unique_sample_rate = set(sample_rates)
+        if len(unique_sample_rate) > 1:
+            raise ValueError("file {} samples has different samples rates [{}]".format(
+                full_file_path,
+                sample_rate,
+                set(sample_rates)
+            ))
 
         samples.insert(int(sample_number), sample_data)
-    return samples
+
+    sample_rate = set(sample_rates).pop() if sample_rates else 0
+    return samples, sample_rate
 
 
-def _populate_store(group_name, normal_data, store):
+def _populate_store(store, group_name, data, sample_rate):
+
     group = store.create_group(group_name)
-    for i, sample in enumerate(normal_data):
-        subgroup = group.create_group('SAMPLE_{}'.format(str(i).zfill(4)))
-        for k, value in sample.items():
-            subgroup.create_dataset(k, data=value)
+    group.create_dataset('SAMPLE_RATE', data=sample_rate)
+    data_group = group.create_group('DATA')
+    for i, sample in enumerate(data):
+        k = 'SAMPLE_{}'.format(str(i).zfill(4))
+        data_group.create_dataset(k, data=sample)
 
 
 @click.command()
@@ -62,8 +77,8 @@ def convert(input_directory, subject_name, destination_file):
     store = h5py.File(destination_file, 'w')
 
     for type_of_samples, group_name in DATA_TYPE_STORE_KEY_MAPPING.items():
-        data = _read_and_parse_files(input_directory, subject_name, type_of_samples)
-        _populate_store(group_name, data, store)
+        data, sample_rate = _read_and_parse_files(input_directory, subject_name, type_of_samples)
+        _populate_store(store, group_name, data, sample_rate)
 
     store.close()
 
