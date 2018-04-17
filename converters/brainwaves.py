@@ -27,6 +27,10 @@ def _read_and_parse_files(input_directory, subject_name, type_of_samples):
     filemask = FILEMASK.format(subject_name, type_of_samples)
     samples = []
     sample_rates = []
+    file_list = glob.glob(os.path.join(input_directory, filemask))
+
+    if not file_list:
+        click.echo("No File found with mask {}".format(filemask))
 
     for full_file_path in glob.glob(os.path.join(input_directory, filemask)):
 
