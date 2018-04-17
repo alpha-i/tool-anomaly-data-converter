@@ -68,6 +68,7 @@ def _populate_store(store, group_name, data, sample_rate):
         data_group.create_dataset(k, data=sample)
 
 
+
 @click.command()
 @click.argument('input_directory', type=click.Path(exists=True))
 @click.argument('subject_name', type=click.STRING)
@@ -83,6 +84,7 @@ def convert(input_directory, subject_name, destination_file):
     for type_of_samples, group_name in DATA_TYPE_STORE_KEY_MAPPING.items():
         data, sample_rate = _read_and_parse_files(input_directory, subject_name, type_of_samples)
         _populate_store(store, group_name, data, sample_rate)
+        click.echo("Saved data of type {}".format(type_of_samples))
 
     store.close()
 
