@@ -80,7 +80,8 @@ def get_data_mapping(use_custom_test):
 @click.argument('input_directory', type=click.Path(exists=True))
 @click.argument('subject_name', type=click.STRING)
 @click.argument('destination_file', type=click.STRING)
-def convert(input_directory, subject_name, destination_file, set_custom_test=USE_CUSTOM_TEST):
+@click.option('--use-custom-test/--no-use-custom-test', default=True)
+def convert(input_directory, subject_name, destination_file, set_custom_test):
 
     if os.path.isfile(destination_file):
         if not click.confirm('Destination file {} exists. Do you want to continue?'.format(destination_file)):
