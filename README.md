@@ -25,7 +25,7 @@ Convert Kaggle brainwaves data to hdf5
 --------------------
 
 ```bash
-$ python alphai_data_conversion/brainwaves_converter.py input_directory subject_name destination_file
+$ python converters/brainwaves.py input_directory subject_name destination_file
 ```
 where
 * `input_directory`: is the directory where files are located
