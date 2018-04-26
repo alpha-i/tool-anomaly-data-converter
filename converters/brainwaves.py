@@ -13,14 +13,10 @@ ABNORMAL = 'preictal'
 NORMAL = 'interictal'
 TEST = 'test'
 
-DATA_TYPE_STORE_KEY_MAPPING = {
-    ABNORMAL: 'ABNORMAL',
-    NORMAL: 'NORMAL',
-    TEST: 'TEST'
-}
-
 FILEMASK = '{}_{}_*.mat'
 KEY_TEMPLATE = '{}_segment_{}'
+USE_CUSTOM_TEST = True
+N_CUSTOM_TEST_SAMPLES = 20
 
 
 def _read_and_parse_files(input_directory, subject_name, type_of_samples):
@@ -67,27 +63,55 @@ def _populate_store(store, group_name, data, sample_rate):
         k = 'SAMPLE_{}'.format(str(i).zfill(4))
         data_group.create_dataset(k, data=sample)
 
+def get_data_mapping(use_custom_test):
+
+    DATA_TYPE_STORE_KEY_MAPPING = {
+        ABNORMAL: 'ABNORMAL',
+        NORMAL: 'NORMAL',
+    }
+
+    if not use_custom_test:
+        DATA_TYPE_STORE_KEY_MAPPING['TEST'] = 'TEST'
+
+    return DATA_TYPE_STORE_KEY_MAPPING
 
 
 @click.command()
 @click.argument('input_directory', type=click.Path(exists=True))
 @click.argument('subject_name', type=click.STRING)
 @click.argument('destination_file', type=click.STRING)
-def convert(input_directory, subject_name, destination_file):
+@click.option('--use-custom-test/--no-use-custom-test', default=True)
+def convert(input_directory, subject_name, destination_file, set_custom_test):
 
     if os.path.isfile(destination_file):
         if not click.confirm('Destination file {} exists. Do you want to continue?'.format(destination_file)):
             exit()
 
     store = h5py.File(destination_file, 'w')
+    test_data = []
+    data_type_key_mapping = get_data_mapping(set_custom_test)
 
-    for type_of_samples, group_name in DATA_TYPE_STORE_KEY_MAPPING.items():
+    for type_of_samples, group_name in data_type_key_mapping.items():
         data, sample_rate = _read_and_parse_files(input_directory, subject_name, type_of_samples)
-        _populate_store(store, group_name, data, sample_rate)
+
+        if set_custom_test: # Leave some samples aside as tests
+            n_train_samples = len(data) - N_CUSTOM_TEST_SAMPLES
+            train_data = data[0:n_train_samples]
+            test_data.append(data[n_train_samples:])
+
+            _populate_store(store, group_name, train_data, sample_rate)
+        else:
+            _populate_store(store, group_name, data, sample_rate)
+
         click.echo("Saved data of type {}".format(type_of_samples))
+
+    if set_custom_test:
+        _populate_store(store, 'TEST', test_data, sample_rate)
 
     store.close()
 
 
 if __name__ == '__main__':
+    #    input = '/Users/fergus/Kaggle/EEG/Dog_1'
     convert()
+    # convert(input_directory=input, subject_name='Dog_1', destination_file='doggy.hd5')

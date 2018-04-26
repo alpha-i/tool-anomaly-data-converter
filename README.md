@@ -14,7 +14,7 @@ Each converter must create an hd5 file with the following structure:
 
 3 root-level groups called `NORMAL`, `ABNORMAL` and `TEST`
 * `NORMAL`: contains measurement (samples) where the event is considered normal (good flight, regular brain activity etc)
-* `ABNORMAL`: contains measurement (samples) where the event is considered abnormal 
+* `ABNORMAL`: contains measurement (samples) where the event is considered abnormal
 * `TEST`: contains measurement where the type is unknown
 
 Each root-level group contains two keys:
@@ -31,5 +31,3 @@ where
 * `input_directory`: is the directory where files are located
 * `subject_name`: is the filename prefix (es: Dog_1)
 * `destination_file`: is the fullpath of the hd5 output file
-
-
