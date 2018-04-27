@@ -80,8 +80,8 @@ def get_data_mapping(use_custom_test):
 @click.argument('input_directory', type=click.Path(exists=True))
 @click.argument('subject_name', type=click.STRING)
 @click.argument('destination_file', type=click.STRING)
-@click.option('--use-custom-test/--no-use-custom-test', default=True)
-def convert(input_directory, subject_name, destination_file, set_custom_test):
+@click.option('--use_custom_test/--no-use_custom_test', default=True)
+def convert(input_directory, subject_name, destination_file, use_custom_test):
 
     if os.path.isfile(destination_file):
         if not click.confirm('Destination file {} exists. Do you want to continue?'.format(destination_file)):
@@ -89,12 +89,12 @@ def convert(input_directory, subject_name, destination_file, set_custom_test):
 
     store = h5py.File(destination_file, 'w')
     test_data = []
-    data_type_key_mapping = get_data_mapping(set_custom_test)
+    data_type_key_mapping = get_data_mapping(use_custom_test)
 
     for type_of_samples, group_name in data_type_key_mapping.items():
         data, sample_rate = _read_and_parse_files(input_directory, subject_name, type_of_samples)
 
-        if set_custom_test: # Leave some samples aside as tests
+        if use_custom_test:  # Leave some samples aside as tests
             n_train_samples = len(data) - N_CUSTOM_TEST_SAMPLES
             train_data = data[0:n_train_samples]
             test_data.append(data[n_train_samples:])
@@ -105,7 +105,7 @@ def convert(input_directory, subject_name, destination_file, set_custom_test):
 
         click.echo("Saved data of type {}".format(type_of_samples))
 
-    if set_custom_test:
+    if use_custom_test:
         _populate_store(store, 'TEST', test_data, sample_rate)
 
     store.close()

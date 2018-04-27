@@ -5,6 +5,7 @@
 ```bash
 $ conda create -n anomaly-transform python=3.5 numpy
 $ source activate anomaly-transform
+$ pip install -U setuptools --ignore-installed
 $ pip install -r requirements.txt
 ```
 
@@ -25,7 +26,7 @@ Convert Kaggle brainwaves data to hdf5
 --------------------
 
 ```bash
-$ python converters/brainwaves.py input_directory subject_name destination_file
+$ python converters/brainwaves.py --use_custom_test input_directory subject_name destination_file
 ```
 where
 * `input_directory`: is the directory where files are located
